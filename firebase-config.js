@@ -1,10 +1,10 @@
-// Paste your Firebase Web App config here. See SETUP.txt.
-window.FIREBASE_CONFIG={
- apiKey:"PASTE_YOUR_API_KEY_HERE",
- authDomain:"PASTE_YOUR_PROJECT_ID.firebaseapp.com",
- databaseURL:"https://PASTE_YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
- projectId:"PASTE_YOUR_PROJECT_ID",
- storageBucket:"PASTE_YOUR_PROJECT_ID.firebasestorage.app",
- messagingSenderId:"PASTE_YOUR_MESSAGING_SENDER_ID",
- appId:"PASTE_YOUR_APP_ID"
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDrBciZNjePF0RGI9TjVKHjEtS_0aHbN0",
+  authDomain: "mental-memory-race.firebaseapp.com",
+  databaseURL: "https://mental-memory-race-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mental-memory-race",
+  storageBucket: "mental-memory-race.firebasestorage.app",
+  messagingSenderId: "514354709435",
+  appId: "1:514354709435:web:e7ea891e35aa60ae0ba9e",
+  measurementId: "G-HKB3W7ZQ1R"
 };
