@@ -1,0 +1,37 @@
+MENTAL MEMORY RACE + LIVE LEADERBOARD
+
+Upload all 4 files to your GitHub repository root:
+index.html
+leaderboard.html
+style.css
+firebase-config.js
+
+The LIVE leaderboard uses Firebase Realtime Database.
+
+1. Go to https://console.firebase.google.com/
+2. Create a Firebase project.
+3. Open Realtime Database and create a database.
+4. For a simple school-event prototype, you can start in test mode.
+5. Project Settings (gear) > Your apps > Web app (</>) > register app.
+6. Copy the Firebase config.
+7. Open firebase-config.js and replace every PASTE... value with your config.
+8. Realtime Database > Rules. For a simple prototype:
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+WARNING: These rules allow public writes and can be cheated. For a serious competition, use authentication/server-side validation.
+9. Upload the files to GitHub.
+10. Settings > Pages > Deploy from a branch > main > /(root) > Save.
+11. Open your GitHub Pages URL.
+
+SCORING:
+10,000 starting points
+-10 points per second
+-100 points per mistake
+minimum 100 points
+
+The leaderboard automatically sorts highest score first and updates live without refreshing.
+The live leaderboard needs internet. The game interface can open locally, but live scores require Firebase internet access.
