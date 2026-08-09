@@ -1,4 +1,150 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Live Leaderboard</title><link rel="stylesheet" href="style.css"></head><body><header><b>🏆 LIVE LEADERBOARD</b><a href="index.html">🧠 PLAY GAME</a></header><main><section class="card"><h1>🏆 Memory Race Leaderboard</h1><p id="status">Connecting...</p><table><thead><tr><th>Rank</th><th>Player</th><th>Score</th><th>Time</th><th>Mistakes</th></tr></thead><tbody id="rows"></tbody></table></section></main>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script><script src="firebase-config.js"></script><script>
-if(window.FIREBASE_CONFIG.apiKey==="PASTE_YOUR_API_KEY_HERE"){status.textContent="Firebase is not configured. Follow SETUP.txt."}else{firebase.initializeApp(window.FIREBASE_CONFIG);firebase.database().ref("scores").on("value",snap=>{let a=[];snap.forEach(c=>a.push(c.val()));a.sort((x,y)=>(y.score||0)-(x.score||0)||(x.time||999)-(y.time||999));rows.innerHTML=a.slice(0,100).map((x,i)=>`<tr><td>${i<3?["🥇","🥈","🥉"][i]:i+1}</td><td>${esc(x.name||"Player")}</td><td><b>${Number(x.score||0).toLocaleString()}</b></td><td>${Number(x.time||0).toFixed(1)}s</td><td>${x.mistakes||0}</td></tr>`).join("");status.textContent="🟢 LIVE · "+a.length+" scores";})}function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memory Race Leaderboard</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#10162f,#222b55);color:#fff;min-height:100vh}
+header{padding:18px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#0004}
+header b{font-size:22px}
+header a{background:#ffd166;color:#18203f;padding:11px 16px;border-radius:12px;font-weight:800;text-decoration:none}
+main{max-width:1000px;margin:auto;padding:25px}
+.card{background:#ffffff1a;border:1px solid #ffffff30;border-radius:22px;padding:28px;box-shadow:0 15px 45px #0005}
+h1{margin-top:0}
+#status{font-weight:700}
+.live{color:#52d273}
+.error{color:#ff6b6b}
+table{width:100%;border-collapse:collapse}
+th,td{padding:14px 10px;border-bottom:1px solid #ffffff25;text-align:left}
+th{color:#ffd166}
+.rank{font-size:22px}
+.empty{text-align:center;padding:30px;color:#c9cee8}
+@media(max-width:650px){
+ main{padding:12px}.card{padding:18px}
+ table{font-size:13px}
+ th,td{padding:11px 7px}
+ header b{font-size:18px}
+}
+</style>
+</head>
+<body>
+<header>
+<b>🏆 MEMORY RACE LEADERBOARD</b>
+<a href="index.html">🧠 PLAY GAME</a>
+</header>
+
+<main>
+<section class="card">
+<h1>🏆 Live Leaderboard</h1>
+<p id="status">🔄 Connecting to live leaderboard...</p>
+
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Player</th>
+<th>Score</th>
+<th>Time</th>
+<th>Mistakes</th>
+</tr>
+</thead>
+<tbody id="rows">
+<tr><td colspan="5" class="empty">Loading scores...</td></tr>
+</tbody>
+</table>
+</section>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+(function(){
+  const statusEl=document.getElementById("status");
+  const rowsEl=document.getElementById("rows");
+
+  if(!window.FIREBASE_CONFIG ||
+     !window.FIREBASE_CONFIG.apiKey ||
+     window.FIREBASE_CONFIG.apiKey==="PASTE_YOUR_API_KEY_HERE"){
+    statusEl.className="error";
+    statusEl.textContent="❌ Firebase configuration is missing.";
+    rowsEl.innerHTML='<tr><td colspan="5" class="empty">Firebase is not configured.</td></tr>';
+    return;
+  }
+
+  try{
+    firebase.initializeApp(window.FIREBASE_CONFIG);
+    const db=firebase.database();
+
+    db.ref("scores").on("value",
+      function(snapshot){
+        const scores=[];
+
+        snapshot.forEach(function(child){
+          const data=child.val() || {};
+          scores.push({
+            id:child.key,
+            name:String(data.name || "Player"),
+            score:Number(data.score || 0),
+            time:Number(data.time || 0),
+            mistakes:Number(data.mistakes || 0),
+            createdAt:Number(data.createdAt || 0)
+          });
+        });
+
+        scores.sort(function(a,b){
+          if(b.score !== a.score) return b.score-a.score;
+          if(a.time !== b.time) return a.time-b.time;
+          return a.mistakes-b.mistakes;
+        });
+
+        statusEl.className="live";
+        statusEl.textContent="🟢 LIVE · "+scores.length+" SCORE"+(scores.length===1?"":"S");
+
+        if(scores.length===0){
+          rowsEl.innerHTML='<tr><td colspan="5" class="empty">No scores yet. Be the first player!</td></tr>';
+          return;
+        }
+
+        rowsEl.innerHTML=scores.map(function(x,i){
+          let medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":String(i+1);
+
+          return "<tr>"+
+            "<td class='rank'>"+medal+"</td>"+
+            "<td><b>"+escapeHTML(x.name)+"</b></td>"+
+            "<td><b>"+x.score.toLocaleString()+"</b></td>"+
+            "<td>"+x.time.toFixed(1)+"s</td>"+
+            "<td>"+x.mistakes+"</td>"+
+          "</tr>";
+        }).join("");
+      },
+      function(error){
+        console.error(error);
+        statusEl.className="error";
+        statusEl.textContent="❌ Firebase error: "+error.message;
+      }
+    );
+  }catch(error){
+    console.error(error);
+    statusEl.className="error";
+    statusEl.textContent="❌ Could not connect to Firebase.";
+  }
+
+  function escapeHTML(value){
+    return String(value).replace(/[&<>"']/g,function(c){
+      return {
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+      }[c];
+    });
+  }
+})();
+</script>
+</body>
+</html>
